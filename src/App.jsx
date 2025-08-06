@@ -1,48 +1,62 @@
 import { useSelector, useDispatch } from "react-redux"
-import { addTodo, removeToDo } from "./todoslice"
-import { useState } from "react" 
- 
+import { addTodo, removeToDo, toggleTodo, setFilter } from "./todoslice"
+import { useState } from "react"
+import { selectFilteredTodos } from "./selectors"
+
 
 const App = () => {
 
-  const [newTODo, setNewToDo] = useState("")
+  const [newTOdo, setNewTodo] = useState("")
 
-  const todos = useSelector((state) => state.todos.todos)
+  const todos = useSelector(selectFilteredTodos)
   const dispatch = useDispatch()
 
-  const HandleAddToDo = () =>{
-    if (newTODo.trim()) {
+  const HandleAddToDo = () => {
+    if (newTOdo.trim()) {
       dispatch(addTodo({
         id: Date.now(),
-        text: newTODo
+        text: newTOdo
       }));
-      setNewToDo("")
+      setNewTodo("")
     }
   }
 
   const handleRemoveToDo = (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete??")
-    if (confirmDelete){
+    if (confirmDelete) {
       dispatch(removeToDo(id))
     }
   }
 
-  return(
+  const handleToggleTodo = (id) => {
+    dispatch(toggleTodo(id))
+  }
+
+   const handleFilterChange = (filter) => {
+        dispatch(setFilter(filter));
+    };
+
+  return (
     <>
 
-    <input type="text" onChange={(e) => setNewToDo(e.target.value)} value={newTODo}/>
-    <button onClick={HandleAddToDo}> Add todo </button>
+      <button onClick={() => handleFilterChange("All")}>All</button>
+      <button onClick={() => handleFilterChange("Completed")}>Completed</button>
+      <button onClick={() => handleFilterChange("Incomplete")}>Not Completed</button>
 
 
-    {
-      todos.map(todo => (
-        <div key={todo.id}>
-          <p>{todo.text}</p>
-          <button onClick={()=>{handleRemoveToDo(todo.id)}}> Delete </button>
+      <input type="text" onChange={(e) => setNewTodo(e.target.value)} value={newTOdo} />
+      <button onClick={HandleAddToDo}> Add todo </button>
 
-        </div>
-      ))
-    }
+
+      {
+        todos.map(todo => (
+          <div key={todo.id}>
+            <p>{todo.text}</p>
+            <button onClick={() => { handleRemoveToDo(todo.id) }}> Delete </button>
+            <button onClick={() => { handleToggleTodo(todo.id) }}> {todo.completed ? "undone" : "Done"}</button>
+          </div>
+        ))
+      }
     </>
   )
 }
